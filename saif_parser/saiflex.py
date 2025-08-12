@@ -5,42 +5,37 @@ import ply.lex as lex
 input_data = ""
 
 reserved = {
-    "module" : "MODULE",
-    "endmodule" : "ENDMODULE",
-    "wire" : "WIRE",
-    "assign" : "ASSIGN",
-    "input" : "INPUT",
-    "output" : "OUTPUT"
+    'SAIFILE' : 'SAIFILE',
+    'SAIFVERSION' : 'SAIFVERSION',
+    'DIRECTION' : 'DIRECTION',
+    'DESIGN' : 'DESIGN',
+    'DATE' : 'DATE',
+    'VENDOR' : 'VENDOR',
+    'PROGRAM_NAME' : 'PROGRAM_NAME',
+    'VERSION' : 'VERSION',
+    'DIVIDER' : 'DIVIDER',
+    'TIMESCALE' : 'TIMESCALE',
+    'DURATION' : 'DURATION',
+    'INSTANCE' : 'INSTANCE',
+    'NET' : 'NET',
+    'T0' : 'T0',
+    'T1' : 'T1',
+    'TX' : 'TX',
+    'TC' : 'TC',
+    'IG' : 'IG',
 }
 
 tokens = (
     'LPAR',
     'RPAR',
-    'LBRA',
-    'RBRA',
-    'EQUAL',
-    'COLON',
-    'DOT',
-    'COMMA',
-    'SEMICOLON',
+    'QSTRING',
     'STRING',
-    #'SSTRING',
     'NUMBER',
 ) + tuple(reserved.values())
 
 t_LPAR = r'\('
 t_RPAR = r'\)'
-t_LBRA = r'\['
-t_RBRA = r'\]'
-t_EQUAL = r'='
-t_COLON = r':'
-t_SEMICOLON = r';'
-t_DOT = r'\.'
-t_COMMA = r','
-
-# t_QSTRING = r'\"[a-zA-Z0-9_!#$%&\'()*+,\-./:;<=>?@\[\\\]^`{|}~ \t\n]+\"'
-
-
+t_QSTRING = r'\"[a-zA-Z0-9_!#$%&\'()*+,\-./:;<=>?@\[\\\]^`{|}~ \t\n]+\"'
 
 t_ignore = ' \t'
 
@@ -52,21 +47,10 @@ def t_NUMBER(t):
 
 
 def t_STRING(t):
-    # r'[a-zA-Z0-9_\/.\[\]\\]+'
-    r'[a-zA-Z0-9_]+'
+    r'[a-zA-Z0-9_\/.\[\]\\]+'
     t.type = reserved.get(t.value, 'STRING')
     return t
 
-def t_SSTRING(t):
-    # r'[a-zA-Z0-9_\/.\[\]\\]+'
-    r'\\[a-zA-Z0-9_\/.\[\]\\]+'
-    t.type = reserved.get(t.value, 'STRING')
-    return t
-
-def t_COMMEND(t):
-    # r'[a-zA-Z0-9_\/.\[\]\\]+'
-    r'\/\/[a-zA-Z0-9_!#$%&\'()*+,\-./:;<=>?@\[\\\]^`{|}~ \t]*'
-    pass
 
 def t_newline(t):
     r'\n+'

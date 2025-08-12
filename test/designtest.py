@@ -24,6 +24,8 @@ mydesign.uniqueModules()
 # mydesign.modules[mydesign.top_design].dumpjson('log')
 mydesign.genGateNetwork()
 
-# mydesign.netAnnotation(saif_path, 'gfmul_tb/mul_x/mul_x')
+mydesign.netAnnotation(saif_path, 'gfmul_tb/mul_x/mul_x')
+
+
 
 

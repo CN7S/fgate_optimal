@@ -1,6 +1,6 @@
 from verilog_parser import parser
 from verilog_parser.netlist import Gate, GateAttr, Module
-# from saif_parser import saifparse
+from saif_parser import saifparse
 from .network import NetWork
 import os
 import queue
@@ -255,50 +255,50 @@ class Design :
 
         gatesearch(self.modules[self.top_design])
 
-    # def netAnnotation(self, saifpath, inst_path):
-    #     totalnet = self.gate_net.getSize()
+    def netAnnotation(self, saifpath, inst_path):
+        totalnet = self.gate_net.getSize()
 
-    #     with open(os.path.join(saifpath, 'func.saif'), 'r') as f:
-    #         func_saifinfo = saifparse.parse(f.read())
-    #     with open(os.path.join(saifpath, 'glitch.saif'), 'r') as f:
-    #         glitch_saifinfo = saifparse.parse(f.read())
-    #     inst_path = inst_path.split('/')
-    #     for i in inst_path : 
-    #         func_saifinfo = func_saifinfo['cells'][i]
-    #         glitch_saifinfo = glitch_saifinfo['cells'][i]
-        
-    #     def annotateModule(module : Module, funcinfo, glitchinfo):
-    #         annotate_cnt = 0
-    #         for inst in module.inst_dict.values() : 
-    #             if inst.module in self.modules : 
-    #                 annotate_cnt = annotate_cnt + \
-    #                     annotateModule(self.modules[inst.module], 
-    #                                funcinfo['cells'][inst.name], 
-    #                                glitchinfo['cells'][inst.name])
-    #             elif inst.module in self.gate_lib : 
-    #                 gate_name = inst.moudule + '.' + inst.name
-    #                 g:Gate = self.gate_net.gate_dict[gate_name]
+        with open(os.path.join(saifpath, 'func.saif'), 'r') as f:
+            func_saifinfo = saifparse.parse(f.read())
+        with open(os.path.join(saifpath, 'glitch.saif'), 'r') as f:
+            glitch_saifinfo = saifparse.parse(f.read())
+        inst_path = inst_path.split('/')
+        for i in inst_path : 
+            func_saifinfo = func_saifinfo['cells'][i]
+            glitch_saifinfo = glitch_saifinfo['cells'][i]
+
+        def annotateModule(module : Module, funcinfo, glitchinfo):
+            annotate_cnt = 0
+            for inst in module.inst_dict.values() : 
+                if inst.module in self.modules : 
+                    annotate_cnt = annotate_cnt + \
+                        annotateModule(self.modules[inst.module], 
+                                   funcinfo['cells'][inst.name], 
+                                   glitchinfo['cells'][inst.name])
+                elif inst.module in self.gate_lib : 
+                    gate_name = module.name + '.' + inst.name
+                    g:Gate = self.gate_net.gate_dict[gate_name]
                     
-    #                 # get output name
-    #                 funcnet = funcinfo['cells'][inst.name]['net_list']
-    #                 glitchnet = glitchinfo['cells'][inst.name]['net_list']
-    #                 if 'Z' in funcnet : 
-    #                     g.attr.func_tr = funcnet['Z']['tx']
-    #                     g.attr.glitch_tr = glitchnet['Z']['tx']
-    #                     g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
-    #                 else :
-    #                     g.attr.func_tr = funcnet['ZN']['tx']
-    #                     g.attr.glitch_tr = glitchnet['ZN']['tx']
-    #                     g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
+                    # get output name
+                    funcnet = funcinfo['cells'][inst.name]['net_list']
+                    glitchnet = glitchinfo['cells'][inst.name]['net_list']
+                    if 'Z' in funcnet : 
+                        g.attr.func_tr = funcnet['Z']['tx']
+                        g.attr.glitch_tr = glitchnet['Z']['tx']
+                        g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
+                    else :
+                        g.attr.func_tr = funcnet['ZN']['tx']
+                        g.attr.glitch_tr = glitchnet['ZN']['tx']
+                        g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
                     
-    #                 annotate_cnt = annotate_cnt + 1
-    #         return annotate_cnt
+                    annotate_cnt = annotate_cnt + 1
+            return annotate_cnt
         
-    #     annotated_gate_num = annotateModule(self.modules[self.top_design], 
-    #                                         func_saifinfo, 
-    #                                         glitch_saifinfo)
+        annotated_gate_num = annotateModule(self.modules[self.top_design], 
+                                            func_saifinfo, 
+                                            glitch_saifinfo)
         
-    #     print(f'Annotated {annotated_gate_num} Gate in Total {totalnet} Gate. ({annotated_gate_num/totalnet})')
+        print(f'Annotated {annotated_gate_num} Gate in Total {totalnet} Gate. ({annotated_gate_num/totalnet})')
         
 
         

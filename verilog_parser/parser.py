@@ -12,5 +12,5 @@ def init():
 def parse(input):
     init()
     vlex.input_data = input
-    vyacc.parser.parse(vlex.input_data)
+    vyacc.parser.parse(vlex.input_data, lexer = vlex.lexer)
     return vyacc.module_list
