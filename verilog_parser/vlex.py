@@ -18,6 +18,8 @@ tokens = (
     'RPAR',
     'LBRA',
     'RBRA',
+    'LCBRA',
+    'RCBRA',
     'EQUAL',
     'COLON',
     'DOT',
@@ -32,6 +34,8 @@ t_LPAR = r'\('
 t_RPAR = r'\)'
 t_LBRA = r'\['
 t_RBRA = r'\]'
+t_LCBRA = r'{'
+t_RCBRA = r'}'
 t_EQUAL = r'='
 t_COLON = r':'
 t_SEMICOLON = r';'

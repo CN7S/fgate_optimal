@@ -111,8 +111,9 @@ class Design :
 
                         try:
                             port.wire_connect[port_pos] = wire_con
-                        except:
-                            print('Error (07) : Wire Connect Error.')
+                        except Exception as e:
+                            print(f'Error (07) : Port {p[0]} / Wire {wire_con} Connect Error. {len(port.wire_connect)} {port_pos} {e}')
+                            input()
 
             # check connect status
             check_flag = 1

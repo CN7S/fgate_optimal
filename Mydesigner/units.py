@@ -7,7 +7,7 @@ def dumpModule(module : Module, filepath : str) :
     module_name = module.name
     filepath = os.path.join(filepath, f'{module_name}.v')
 
-    # module.dumpjson(filepath)
+    module.dumpjson(filepath + '.json')
 
     module_port_list = [x for x in module.port_dict.keys()]
     module_port_header = ''
@@ -139,20 +139,18 @@ def dumpModule(module : Module, filepath : str) :
                     if wire_msb + 1 == _connect[1] : 
                         wire_msb = _connect[1]
                     else :
+                        if module.wire_dict[wire_name].lsb == wire_lsb \
+                            and module.wire_dict[wire_name].msb == wire_msb : 
+                            wire_list.append(f'{wire_name}')
+                        else :
+                            if wire_lsb == wire_msb : 
+                                wire_list.append(f'{wire_name}[{wire_lsb}]')
+                            else : 
+                                wire_list.append(f'{wire_name}[{wire_msb}:{wire_lsb}]')
 
-                        if wire_name != '' : 
-                            if module.wire_dict[wire_name].lsb == wire_lsb \
-                                and module.wire_dict[wire_name].msb == wire_msb : 
-                                wire_list.append(f'{wire_name}')
-                            else :
-                                if wire_lsb == wire_msb : 
-                                    wire_list.append(f'{wire_name}[{wire_lsb}]')
-                                else : 
-                                    wire_list.append(f'{wire_name}[{wire_msb}:{wire_lsb}]')
-
-                        wire_name = ''
-                        wire_lsb = 0
-                        wire_msb = 0
+                        wire_name = _connect[0]
+                        wire_lsb = _connect[1]
+                        wire_msb = _connect[1]
                 else :
                     if wire_name != '' : 
                         if module.wire_dict[wire_name].lsb == wire_lsb \

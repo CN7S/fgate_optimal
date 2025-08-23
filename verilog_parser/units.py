@@ -31,44 +31,94 @@ def wireConnect(wire_dict : dict, connect_list : list):
             port_lsb = con_op[1]
         else:
             port_lsb = 0
-        wirename = con_op[3]
-        if con_op[4] != -1:
-            wire_lsb = con_op[4]
-            wire_msb = con_op[5]
-        else:
-            wire_lsb = wire_dict[wirename].lsb
-            wire_msb = wire_dict[wirename].msb
+        
+        if isinstance(con_op[3], list):
+            for i in range(len(con_op[3])-1, -1, -1):
+                op = con_op[3][i]
+                if isinstance(op, str):
+                    wirename = op
+                    wire_lsb = wire_dict[wirename].lsb
+                    wire_msb = wire_dict[wirename].msb
+                    for i in range(wire_lsb, wire_msb+1):
+                        wire_dict[wirename].connect[i].append([portname, port_lsb + i - wire_lsb])
+                    port_lsb = port_lsb + wire_msb - wire_lsb + 1
+                else:
+                    op = op['signal']
+                    wirename = op[0]
+                    if len(op) == 2:
+                        wire_dict[wirename].connect[op[1]].append([portname, port_lsb])
+                        port_lsb = port_lsb + 1
+                    else:
+                        wire_msb = op[1]
+                        wire_lsb = op[2]
+                        if wire_lsb < wire_msb:
+                            for i in range(wire_lsb, wire_msb+1):
+                                wire_dict[wirename].connect[i].append([portname, port_lsb + i - wire_lsb])
+                            port_lsb = port_lsb + wire_msb - wire_lsb + 1
+                        else :
+                            for i in range(wire_lsb, wire_msb-1, -1):
+                                wire_dict[wirename].connect[i].append([portname, port_lsb + wire_lsb - i]) 
+                            port_lsb = port_lsb + wire_lsb - wire_msb + 1
+        else :
+            wirename = con_op[3]
+            if con_op[4] != -1:
+                wire_lsb = con_op[4]
+                wire_msb = con_op[5]
+            else:
+                wire_lsb = wire_dict[wirename].lsb
+                wire_msb = wire_dict[wirename].msb
 
-        for i in range(wire_lsb, wire_msb+1):
-            wire_dict[wirename].connect[i].append([portname, port_lsb + i - wire_lsb])   
+            for i in range(wire_lsb, wire_msb+1):
+                wire_dict[wirename].connect[i].append([portname, port_lsb + i - wire_lsb])   
     
 def wireAssign(wire_dict : dict, assign_list : list):
     for op in assign_list:
         wireA_name = op[0]
         if op[1] != -1:
-            wireA_lsb = op[1]
-            wireA_msb = op[2]
+            wireA_msb = op[1]
+            wireA_lsb = op[2]
         else:
             wireA_lsb = wire_dict[wireA_name].lsb
             wireA_msb = wire_dict[wireA_name].msb
 
-        wireB_name = op[3]
-        if op[4] != -1:
-            wireB_lsb = op[4]
-            wireB_msb = op[5]
-        else:
-            wireB_lsb = wire_dict[wireB_name].lsb
-            wireB_msb = wire_dict[wireB_name].msb
+        if isinstance(op[3], list):
+            for i in range(len(op[3])-1, -1, -1):
+                sub_op = op[3][i]
+                if isinstance(sub_op, str):
+                    wireB_name = sub_op
+                    wireB_lsb = wire_dict[wireB_name].lsb
+                    wireB_msb = wire_dict[wireB_name].msb
+                    for j in range(0, wireB_msb-wireB_lsb+1):
+                        wire_dict[wireA_name].connect[wireA_lsb + j].extend(wire_dict[wireB_name].connect[wireB_lsb + j])
+                        wire_dict[wireB_name].connect[wireB_lsb + j].clear()
+                    wireA_lsb = wireA_lsb + wireB_msb - wireB_lsb + 1
+                else:
+                    sub_op = sub_op['signal']
+                    wireB_name = sub_op[0]
+                    if len(sub_op) == 2:
+                        wireB_lsb = sub_op[1]
+                        wire_dict[wireA_name].connect[wireA_lsb].extend(wire_dict[wireB_name].connect[wireB_lsb])
+                        wire_dict[wireB_name].connect[wireB_lsb].clear()
+                        wireA_lsb = wireA_lsb + 1
+                    else:
+                        wireB_msb = sub_op[1]
+                        wireB_lsb = sub_op[2]
+                        for j in range(0, wireB_msb-wireB_lsb+1):
+                            wire_dict[wireA_name].connect[wireA_lsb + j].extend(wire_dict[wireB_name].connect[wireB_lsb + j])
+                            wire_dict[wireB_name].connect[wireB_lsb + j].clear()
+                        wireA_lsb = wireA_lsb + wireB_msb - wireB_lsb + 1
+        else : 
+            wireB_name = op[3]
+            if op[4] != -1:
+                wireB_lsb = op[4]
+                wireB_msb = op[5]
+            else:
+                wireB_lsb = wire_dict[wireB_name].lsb
+                wireB_msb = wire_dict[wireB_name].msb
 
-        for i in range(0, wireA_msb-wireA_lsb+1):
-            # print(i, wireA_name, wireB_name)
-            # print(wireA_lsb, wireA_msb)
-            # print(wireB_lsb, wireB_msb)
-            # print(wire_dict[wireA_name].connect[wireA_lsb + i])
-            # print(wire_dict[wireB_name].connect[wireB_lsb + i])
-            wire_dict[wireA_name].connect[wireA_lsb + i].extend(wire_dict[wireB_name].connect[wireB_lsb + i])
-            wire_dict[wireB_name].connect[wireB_lsb + i].clear()
-            # input()
+            for i in range(0, wireA_msb-wireA_lsb+1):
+                wire_dict[wireA_name].connect[wireA_lsb + i].extend(wire_dict[wireB_name].connect[wireB_lsb + i])
+                wire_dict[wireB_name].connect[wireB_lsb + i].clear()
     
     w_key = [x for x in wire_dict.keys()]
     for w in w_key:

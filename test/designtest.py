@@ -17,7 +17,7 @@ mydesign = Design()
 mydesign.addGateLibFromFloder(gatelib_path)
 mydesign.addModuleFromFloder(modulelib_path)
 mydesign.setTopDesign(top_design)
-mydesign.uniqueModules()
+# mydesign.uniqueModules()
 mydesign.updateModuleInst()
 mydesign.dumpAllModule('./test/dumprtl_test')
 

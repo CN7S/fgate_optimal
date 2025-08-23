@@ -1,7 +1,7 @@
 import json
 def custom_json_dump(obj):
     if(isinstance(obj, Port)):
-        return {'name': obj.name, 'dir': obj.direction, 'lsb':obj.lsb, 'msb':obj.msb}
+        return {'name': obj.name, 'dir': obj.direction, 'lsb':obj.lsb, 'msb':obj.msb, 'connect':obj.wire_connect}
     elif (isinstance(obj, Wire)):
         return {'name': obj.name, 'lsb':obj.lsb, 'msb':obj.msb, 'connect':obj.connect}
     elif isinstance(obj, Instance):
@@ -50,7 +50,7 @@ class Port:
         self.wire_connect = []
         if self.lsb == 0 :
             for _ in range(lsb, msb + 1) :
-                self.wire_connect.append(None)
+                self.wire_connect.append(0)
 
 class GateAttr:
     def __init__(self):

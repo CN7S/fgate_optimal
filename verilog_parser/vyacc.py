@@ -69,23 +69,49 @@ def p_module(p):
         elif op_type == 'assign':
             assign_list.append(op_val)
 
-    instFirstUpdate(inst_dict, wire_dict, connect_list)
+    # instFirstUpdate(inst_dict, wire_dict, connect_list)
     wireConnect(wire_dict, connect_list)
     wireAssign(wire_dict, assign_list)
     uniquePortWire(port_dict, wire_dict)
     p[0] = Module(p[2], port_dict=port_dict, inst_dict=inst_dict, wire_dict=wire_dict)
 
     
-    log = {
-        'wire': wire_dict,
-        'port': port_dict,
-        'inst': inst_dict,
-        'assign' : assign_list,
-        'connect_list':connect_list
-    }
-    with open('testdata.json', 'w') as f:
-        json.dump(log, f, default=custom_json_dump, indent=4)
+    # log = {
+    #     'wire': wire_dict,
+    #     'port': port_dict,
+    #     'inst': inst_dict,
+    #     'assign' : assign_list,
+    #     'connect_list':connect_list
+
+    # }
+    # with open('testdata.json', 'w') as f:
+    #     json.dump(log, f, default=custom_json_dump, indent=4)
+    # print(f'{p[2]}')
+    # input()
         
+
+def p_signalassign(p):
+    '''signalassign : LCBRA signallist RCBRA'''
+    p[0] = p[2]
+
+def p_signallist(p):
+    '''signallist : namelist COMMA signal
+                  | signal COMMA signal
+                  | signallist COMMA STRING
+                  | signallist COMMA signal'''
+    if isinstance(p[1], list):
+        p[0] = p[1]
+        p[0].append(p[3])
+    else :
+        p[0] = [p[1], p[3]]
+
+def p_signal(p):
+    '''signal : STRING LBRA NUMBER RBRA
+              | STRING LBRA NUMBER COLON NUMBER RBRA'''
+    if len(p) == 5:
+        p[0] = {'signal':[p[1], p[3]]}
+    else:
+        p[0] = {'signal':[p[1], p[3], p[5]]}
 
 def p_namelist(p):
     '''namelist : STRING COMMA STRING 
@@ -242,14 +268,26 @@ def p_assign(p):
     '''assign : ASSIGN STRING EQUAL STRING SEMICOLON
             | ASSIGN STRING LBRA NUMBER RBRA EQUAL STRING SEMICOLON
             | ASSIGN STRING EQUAL STRING LBRA NUMBER RBRA SEMICOLON
-            | ASSIGN STRING LBRA NUMBER RBRA EQUAL STRING LBRA NUMBER RBRA SEMICOLON'''
+            | ASSIGN STRING LBRA NUMBER RBRA EQUAL STRING LBRA NUMBER RBRA SEMICOLON
+            | ASSIGN STRING EQUAL signalassign SEMICOLON
+            | ASSIGN STRING EQUAL signal SEMICOLON
+            | ASSIGN STRING LBRA NUMBER COLON NUMBER RBRA EQUAL signal SEMICOLON
+            | ASSIGN STRING LBRA NUMBER COLON NUMBER RBRA EQUAL signalassign SEMICOLON'''
     if len(p) == 6 :
-        op = [p[2], -1, -1, p[4], -1, -1]
+        if isinstance(p[4], dict) :
+            op = [p[2], -1, -1, p[4]['signal'][0], p[4]['signal'][1], p[4]['signal'][-1] if len(p[4]['signal'])==3 else p[4]['signal'][1]]
+        else :
+            op = [p[2], -1, -1, p[4], -1, -1]
     elif len(p) == 9 :
         if p[3] == '=':
             op = [p[2], -1, -1, p[4], p[6], p[6]]
         else :
             op = [p[2], p[4], p[4], p[7], -1, -1]
+    elif len(p) == 11 :
+        if isinstance(p[9], dict) : 
+            op = [p[2], p[4], p[6], p[9]['signal'][0], p[9]['signal'][1], p[9]['signal'][-1] if len(p[9]['signal'])==3 else p[9]['signal'][1]]
+        else :
+            op = [p[2], p[4], p[6], p[9], -1, -1]
     else :
         op = [p[2], p[4], p[4], p[7], p[9], p[9]]
     p[0] = ['assign', op]
@@ -274,7 +312,8 @@ def p_inst_port_list(p):
 def p_inst_port(p):
     '''inst_port : DOT STRING LPAR STRING RPAR
                  | DOT STRING LPAR STRING LBRA NUMBER RBRA RPAR
-                 | DOT STRING LPAR STRING LBRA NUMBER COLON NUMBER RBRA RPAR'''
+                 | DOT STRING LPAR STRING LBRA NUMBER COLON NUMBER RBRA RPAR
+                 | DOT STRING LPAR signalassign RPAR'''
     if len(p) == 6:
         p[0] = [p[2], -1, -1, p[4], -1, -1]
     elif len(p) == 9:
