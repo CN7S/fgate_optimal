@@ -19,7 +19,7 @@ mydesign.addModuleFromFloder(modulelib_path)
 mydesign.setTopDesign(top_design)
 mydesign.uniqueModules()
 mydesign.updateModuleInst()
-mydesign.dumpModule(mydesign.top_design, '.')
+mydesign.dumpAllModule('./test/dumprtl_test')
 
 # for modulename in mydesign.modules:
 #     mydesign.modules[modulename].dumpjson(f'test/debug/{modulename}.json')

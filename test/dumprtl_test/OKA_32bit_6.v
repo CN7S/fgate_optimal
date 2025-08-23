@@ -1,0 +1,25 @@
+module OKA_32bit_6 ( a, b, y );
+input [31:0] a;
+input [31:0] b;
+output [62:0] y;
+wire [62:0] _y;
+wire [15:0] aa;
+wire [15:0] bb;
+wire [15:0] al;
+wire [15:0] ah;
+wire [15:0] bl;
+wire [15:0] bh;
+wire [30:0] z0;
+wire [30:0] z1;
+wire [30:0] z2;
+assign al = a[15:0];
+assign ah = a[31:16];
+assign bl = b[15:0];
+assign bh = b[31:16];
+assign y = _y;
+s_32bit_6 s32_u ( .a( { ah, al } ), .b( { bh, bl } ), .aa( aa ), .bb( bb ) );
+OKA_16bit_18 mul16_0 ( .a( al ), .b( bl ), .y( { z0[30:16], _y[15:0] } ) );
+OKA_16bit_19 mul16_1 ( .a( aa ), .b( bb ), .y( z1 ) );
+OKA_16bit_20 mul16_2 ( .a( ah ), .b( bh ), .y( { _y[62:47], z2[14:0] } ) );
+os_32bit_6 os32_u ( .z0( { z0[30:16], _y[15:0] } ), .z1( z1 ), .z2( { _y[62:47], z2[14:0] } ), .y( _y[46:16] ) );
+endmodule

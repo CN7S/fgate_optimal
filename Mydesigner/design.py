@@ -41,6 +41,11 @@ class Design :
 
     def dumpModule(self, modulename, path) : 
         units.dumpModule(self.modules[modulename], path)
+    
+    def dumpAllModule(self, path) : 
+        for module in self.modules.values() : 
+            units.dumpModule(module=module, filepath=path)
+
 
     def setTopDesign(self, top_design):
         self.top_design = top_design
