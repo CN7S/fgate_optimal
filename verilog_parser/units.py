@@ -80,3 +80,16 @@ def wireAssign(wire_dict : dict, assign_list : list):
                 break
         if(empty) : 
             wire_dict.pop(w)
+
+def uniquePortWire(port_dict : dict, wire_dict : dict) :
+    wire_list = [x for x in wire_dict.values()]
+    wire_dict.clear()
+
+    for wire in wire_list :
+        wire_name = wire.name
+        if wire_name in port_dict : 
+            wire.name = '_' + wire_name
+        while ( wire.name in wire_dict ) : 
+            wire.name = '_' + wire.name
+        
+        wire_dict[wire.name] = wire

@@ -47,6 +47,10 @@ class Port:
         self.type = type # { 0:"reg", 1:"wire" }
         self.lsb = lsb
         self.msb = msb
+        self.wire_connect = []
+        if self.lsb == 0 :
+            for _ in range(lsb, msb + 1) :
+                self.wire_connect.append(None)
 
 class GateAttr:
     def __init__(self):

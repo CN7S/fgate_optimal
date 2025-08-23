@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .netlist import Wire, Module, Port, Instance
-from .units import portNameFormat, portNameParse, instFirstUpdate,wireConnect,wireAssign
+from .units import portNameFormat, portNameParse, instFirstUpdate,wireConnect,wireAssign,uniquePortWire
 import ply.yacc as yacc
 import json
 from .vlex import tokens
@@ -72,6 +72,7 @@ def p_module(p):
     instFirstUpdate(inst_dict, wire_dict, connect_list)
     wireConnect(wire_dict, connect_list)
     wireAssign(wire_dict, assign_list)
+    uniquePortWire(port_dict, wire_dict)
     p[0] = Module(p[2], port_dict=port_dict, inst_dict=inst_dict, wire_dict=wire_dict)
 
     

@@ -2,6 +2,7 @@ from verilog_parser import parser
 from verilog_parser.netlist import Gate, GateAttr, Module
 from saif_parser import saifparse
 from .network import NetWork
+from . import units
 import os
 import queue
 import copy
@@ -37,6 +38,9 @@ class Design :
         for f in files : 
             if f.split('.')[-1] == 'v' :
                 self.addModuleFromFile(self.gate_lib, os.path.join(path, f))
+
+    def dumpModule(self, modulename, path) : 
+        units.dumpModule(self.modules[modulename], path)
 
     def setTopDesign(self, top_design):
         self.top_design = top_design
@@ -75,6 +79,62 @@ class Design :
         #log
         for i in unique_modules_cnt:
             print(f'Unique {unique_modules_cnt[i]} {i} Module.')
+
+    def updateModuleInst(self):
+        for module in self.modules.values() : 
+            for inst in module.inst_dict.values() : 
+                inst_module = inst.module
+                if inst_module in self.modules : 
+                    inst.port_dict = copy.deepcopy(self.modules[inst_module].port_dict)
+                elif inst_module in self.gate_lib : 
+                    inst.port_dict = copy.deepcopy(self.gate_lib[inst_module].port_dict)
+                else : 
+                    print('Error (06) : Cant find Inst Module in Module Lib, Updated Error.')
+            
+            for wire in module.wire_dict.values() :
+                for i in range(wire.lsb, wire.msb+1) :
+                    wire_con = [wire.name, i]
+                    for p in wire.connect[i] : 
+                        port_name = p[0]
+                        port_pos = p[1]
+                        inst_name = port_name.split('.')[0]
+                        port_name = port_name.split('.')[1]
+                        if inst_name == 'self' : 
+                            port = module.port_dict[port_name]
+                        else :
+                            port = module.inst_dict[inst_name].port_dict[port_name]
+
+                        try:
+                            port.wire_connect[port_pos] = wire_con
+                        except:
+                            print('Error (07) : Wire Connect Error.')
+
+            # check connect status
+            check_flag = 1
+            for port in module.port_dict.values() : 
+                for _ in port.wire_connect : 
+                    if _ == None :
+                        check_flag = 0
+                        break
+                if not check_flag :
+                    break
+            
+            for inst in module.inst_dict.values() : 
+                for port in inst.port_dict.values() : 
+                    for _ in port.wire_connect : 
+                        if _ == None :
+                            check_flag = 0
+                            break
+                    if not check_flag :
+                        break
+                if not check_flag : 
+                    break
+            if not check_flag : 
+                print('Error (08) : Some Ports are not connected.')
+
+
+    def getGateNetwork(self) :
+        return self.gate_net
 
     def genGateNetwork(self) :
 
@@ -283,12 +343,12 @@ class Design :
                     funcnet = funcinfo['cells'][inst.name]['net_list']
                     glitchnet = glitchinfo['cells'][inst.name]['net_list']
                     if 'Z' in funcnet : 
-                        g.attr.func_tr = funcnet['Z']['tx']
-                        g.attr.glitch_tr = glitchnet['Z']['tx']
+                        g.attr.func_tr = funcnet['Z']['tc']
+                        g.attr.glitch_tr = glitchnet['Z']['tc']
                         g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
                     else :
-                        g.attr.func_tr = funcnet['ZN']['tx']
-                        g.attr.glitch_tr = glitchnet['ZN']['tx']
+                        g.attr.func_tr = funcnet['ZN']['tc']
+                        g.attr.glitch_tr = glitchnet['ZN']['tc']
                         g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
                     
                     annotate_cnt = annotate_cnt + 1

@@ -1,7 +1,7 @@
 {
     "wire": {
-        "a": {
-            "name": "a",
+        "_a": {
+            "name": "_a",
             "lsb": 0,
             "msb": 254,
             "connect": [
@@ -3217,8 +3217,8 @@
                 ]
             ]
         },
-        "C_g1": {
-            "name": "C_g1",
+        "_C_g1": {
+            "name": "_C_g1",
             "lsb": 0,
             "msb": 21,
             "connect": [
@@ -3356,8 +3356,8 @@
                 ]
             ]
         },
-        "rst_n": {
-            "name": "rst_n",
+        "_rst_n": {
+            "name": "_rst_n",
             "lsb": 0,
             "msb": 0,
             "connect": [
@@ -3369,8 +3369,8 @@
                 ]
             ]
         },
-        "b": {
-            "name": "b",
+        "_b": {
+            "name": "_b",
             "lsb": 0,
             "msb": 127,
             "connect": [

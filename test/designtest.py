@@ -2,6 +2,7 @@ import sys
 sys.path.append('./')
 
 from Mydesigner.design import Design
+from Mydesigner.optimization import OptEngine
 
 gatelib_path = 'test/gatelib'
 # modulelib_path = 'test/testrtl'
@@ -17,6 +18,8 @@ mydesign.addGateLibFromFloder(gatelib_path)
 mydesign.addModuleFromFloder(modulelib_path)
 mydesign.setTopDesign(top_design)
 mydesign.uniqueModules()
+mydesign.updateModuleInst()
+mydesign.dumpModule(mydesign.top_design, '.')
 
 # for modulename in mydesign.modules:
 #     mydesign.modules[modulename].dumpjson(f'test/debug/{modulename}.json')
@@ -24,8 +27,10 @@ mydesign.uniqueModules()
 # mydesign.modules[mydesign.top_design].dumpjson('log')
 mydesign.genGateNetwork()
 
-mydesign.netAnnotation(saif_path, 'gfmul_tb/mul_x/mul_x')
+# mydesign.netAnnotation(saif_path, 'gfmul_tb/mul_x/mul_x')
 
+# engine = OptEngine(mydesign)
+# engine.fgate_cutset_opt()
 
 
 
