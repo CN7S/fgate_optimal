@@ -8,7 +8,8 @@ gatelib_path = 'test/gatelib'
 # modulelib_path = 'test/testrtl'
 # top_design = 'foo_A'
 
-modulelib_path = 'test/rtldesign'
+# modulelib_path = 'test/rtldesign'
+modulelib_path = 'test/testrtl2'
 top_design = 'gf_mul_128'
 saif_path = 'test/saif'
 

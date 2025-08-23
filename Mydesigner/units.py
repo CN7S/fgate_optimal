@@ -7,7 +7,7 @@ def dumpModule(module : Module, filepath : str) :
     module_name = module.name
     filepath = os.path.join(filepath, f'{module_name}.v')
 
-    module.dumpjson(filepath + '.json')
+    # module.dumpjson(filepath + '.json')
 
     module_port_list = [x for x in module.port_dict.keys()]
     module_port_header = ''

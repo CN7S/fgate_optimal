@@ -91,7 +91,8 @@ def p_module(p):
         
 
 def p_signalassign(p):
-    '''signalassign : LCBRA signallist RCBRA'''
+    '''signalassign : LCBRA signallist RCBRA
+                    | LCBRA namelist RCBRA'''
     p[0] = p[2]
 
 def p_signallist(p):
@@ -275,7 +276,7 @@ def p_assign(p):
             | ASSIGN STRING LBRA NUMBER COLON NUMBER RBRA EQUAL signalassign SEMICOLON'''
     if len(p) == 6 :
         if isinstance(p[4], dict) :
-            op = [p[2], -1, -1, p[4]['signal'][0], p[4]['signal'][1], p[4]['signal'][-1] if len(p[4]['signal'])==3 else p[4]['signal'][1]]
+            op = [p[2], -1, -1, p[4]['signal'][0], p[4]['signal'][-1] if len(p[4]['signal'])==3 else p[4]['signal'][1], p[4]['signal'][1]]
         else :
             op = [p[2], -1, -1, p[4], -1, -1]
     elif len(p) == 9 :
@@ -285,9 +286,9 @@ def p_assign(p):
             op = [p[2], p[4], p[4], p[7], -1, -1]
     elif len(p) == 11 :
         if isinstance(p[9], dict) : 
-            op = [p[2], p[4], p[6], p[9]['signal'][0], p[9]['signal'][1], p[9]['signal'][-1] if len(p[9]['signal'])==3 else p[9]['signal'][1]]
+            op = [p[2], p[6], p[4], p[9]['signal'][0], p[9]['signal'][-1] if len(p[9]['signal'])==3 else p[9]['signal'][1], p[9]['signal'][1]]
         else :
-            op = [p[2], p[4], p[6], p[9], -1, -1]
+            op = [p[2], p[6], p[4], p[9], -1, -1]
     else :
         op = [p[2], p[4], p[4], p[7], p[9], p[9]]
     p[0] = ['assign', op]

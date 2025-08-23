@@ -18,6 +18,7 @@ class Design :
             print(modules)
 
     def addModuleFromFile(self, module_dict, filepath):
+        # print(f'Read File {filepath} ......')
         with open(filepath, 'r') as f:
             modulelist = parser.parse(f.read())
         for m in modulelist:

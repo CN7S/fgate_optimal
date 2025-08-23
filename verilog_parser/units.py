@@ -75,8 +75,8 @@ def wireAssign(wire_dict : dict, assign_list : list):
     for op in assign_list:
         wireA_name = op[0]
         if op[1] != -1:
-            wireA_msb = op[1]
-            wireA_lsb = op[2]
+            wireA_lsb = op[1]
+            wireA_msb = op[2]
         else:
             wireA_lsb = wire_dict[wireA_name].lsb
             wireA_msb = wire_dict[wireA_name].msb
