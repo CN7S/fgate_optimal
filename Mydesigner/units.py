@@ -1,6 +1,7 @@
 from verilog_parser.netlist import Module
 import os
 
+
 def dumpModule(module : Module, filepath : str) :
 
     

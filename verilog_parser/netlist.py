@@ -9,6 +9,28 @@ def custom_json_dump(obj):
     elif isinstance(obj, Module):
         return {'name': obj.name, 'port':obj.port_dict, 'wire':obj.wire_dict, 'inst':obj.inst_dict}
 
+class CellAttribute:
+    def __init__(self):
+        self.delay = 0
+        self.area = 0
+        self.resistance = 0
+        self.capacitance = 0
+        self.glitch_tr = 0
+        self.func_tr = 0
+    
+    def readFromDict(self, attr_dict : dict):
+        if 'delay' in attr_dict :
+            self.delay = attr_dict['delay']
+        if 'area' in attr_dict :
+            self.area = attr_dict['area']
+        if 'resistance' in attr_dict :
+            self.resistance = attr_dict['resistance']
+        if 'capacitance' in attr_dict :
+            self.capacitance = attr_dict['capacitance']
+        if 'glitch_tr' in attr_dict :
+            self.glitch_tr = attr_dict['glitch_tr']
+        if 'func_tr' in attr_dict :
+            self.func_tr = attr_dict['func_tr']
 
 class Wire:
     def __init__(self, name : str, lsb : int = 0, msb : int = 0):
@@ -26,11 +48,26 @@ class Module:
         self.inst_dict = inst_dict
         self.wire_dict = wire_dict
     
+    def addWire(self, name : str, msb : int = 0, lsb : int = 0):
+        if name in self.wire_dict.keys() :
+            print('Warning (01) : Wire {} already exists in module {}.'.format(name, self.name))
+            return self.wire_dict[name]
+        wire = Wire(name, lsb, msb)
+        self.wire_dict[name] = wire
+        return wire
+
     def dumpjson(self, path):
         with open(path, 'w') as f:
             json.dump(self, f, default=custom_json_dump, indent=4)
     
-    
+class StdCell (Module) :
+    def __init__(self, name : str, 
+                 port_dict : dict, 
+                 inst_dict : dict, 
+                 wire_dict : dict, 
+                 cell_attr : CellAttribute):
+        super().__init__(name, port_dict, inst_dict, wire_dict)
+        self.attr = cell_attr 
 
 
 class Instance:
@@ -50,14 +87,22 @@ class Port:
         self.wire_connect = []
         if self.lsb == 0 :
             for _ in range(lsb, msb + 1) :
-                self.wire_connect.append(0)
+                self.wire_connect.append(None)
 
-class GateAttr:
-    def __init__(self):
-        self.C = 0
-        self.R = 0
-        self.glitch_tr = 0
-        self.func_tr = 0
+class GateAttr (CellAttribute) :
+    def __init__(self, cell_attr : CellAttribute = None):
+        super().__init__()
+        if cell_attr is not None :
+            self.delay = cell_attr.delay
+            self.area = cell_attr.area
+            self.resistance = cell_attr.resistance
+            self.capacitance = cell_attr.capacitance
+            self.glitch_tr = cell_attr.glitch_tr
+            self.func_tr = cell_attr.func_tr
+        self.delay_in_network = 0
+
+    def readFromDict(self, attr_dict : dict):
+        super().readFromDict(attr_dict)
 
 class Gate:
     def __init__(self, name : str, module : str, loc : Module, connect_in : list, connect_out : list,

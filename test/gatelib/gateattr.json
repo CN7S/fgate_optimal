@@ -1,0 +1,92 @@
+{
+    "XOR2UD1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 140,
+        "resistance" : 0,
+        "capacitance" : 0.5,
+        "glitch_tr" : 10,
+        "func_tr" : 20
+    },
+    "XOR3UD1BWP30P140" : 
+    {
+        "delay" : 2,
+        "area" : 200,
+        "resistance" : 0,
+        "capacitance" : 0.7,
+        "glitch_tr" : 15,
+        "func_tr" : 25
+    },
+    "XOR4D1BWP30P140" : 
+    {
+        "delay" : 2,
+        "area" : 300,
+        "resistance" : 0,
+        "capacitance" : 1.0,
+        "glitch_tr" : 20,
+        "func_tr" : 30
+    },
+    "CKND2D1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 100,
+        "resistance" : 0,
+        "capacitance" : 0.3,
+        "glitch_tr" : 5,
+        "func_tr" : 15
+    },
+    "NR2D1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 120,
+        "resistance" : 0,
+        "capacitance" : 0.4,
+        "glitch_tr" : 8,
+        "func_tr" : 18
+    },
+    "AN2D1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 110,
+        "resistance" : 0,
+        "capacitance" : 0.35,
+        "glitch_tr" : 6,
+        "func_tr" : 16
+    },
+    "INR2D1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 130,
+        "resistance" : 0,
+        "capacitance" : 0.45,
+        "glitch_tr" : 9,
+        "func_tr" : 19
+    },
+    "INVD1BWP30P140" : 
+    {
+        "delay" : 0,
+        "area" : 80,
+        "resistance" : 0,
+        "capacitance" : 0.25,
+        "glitch_tr" : 4,
+        "func_tr" : 14
+    },
+    "XNR3UD1BWP30P140" : 
+    {
+        "delay" : 2,
+        "area" : 250,
+        "resistance" : 0,
+        "capacitance" : 0.8,
+        "glitch_tr" : 18,
+        "func_tr" : 28
+    },
+    "XNR2UD1BWP30P140" : 
+    {
+        "delay" : 1,
+        "area" : 150,
+        "resistance" : 0,
+        "capacitance" : 0.55,
+        "glitch_tr" : 12,
+        "func_tr" : 22
+    }
+}
