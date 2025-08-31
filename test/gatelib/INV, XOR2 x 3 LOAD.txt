@@ -1,0 +1,137 @@
+INV, XOR2 x 3 LOAD
+
+***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  2.059e-06        5.060e-10        5.115e-10        5.419e-12
+  1.006e-09        1.012e-09        5.334e-12        5.377e-12
+   25.0000        1
+
+INV, XOR2 x 1 LOAD
+***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  9.301e-07        5.060e-10        5.092e-10        3.218e-12
+  1.006e-09        1.010e-09        3.244e-12        3.231e-12
+   25.0000        1
+
+INV, no LOAD
+***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  3.600e-07        5.060e-10        5.080e-10        1.977e-12
+  1.006e-09        1.008e-09        2.105e-12        2.041e-12
+   25.0000        1
+
+
+XOR2 , no LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  1.444e-06        1.007e-09        1.011e-09        4.035e-12
+  2.006e-09        2.013e-09        6.440e-12        5.238e-12
+   25.0000        1
+
+XOR2, XOR2 x 1 LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  1.717e-06        1.007e-09        1.013e-09        5.982e-12
+  2.006e-09        2.015e-09        8.206e-12        7.094e-12
+   25.0000        1
+
+XOR2, XOR3 x 1 LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  1.641e-06        1.007e-09        1.012e-09        5.472e-12
+  2.006e-09        2.014e-09        7.673e-12        6.573e-12
+   25.0000        1
+
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  1.724e-06        1.007e-09        1.013e-09        6.031e-12
+  2.006e-09        2.015e-09        8.227e-12        7.129e-12
+   25.0000        1
+
+XOR2, INV x 1 LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  1.641e-06        1.007e-09        1.012e-09        5.499e-12
+  2.006e-09        2.014e-09        7.715e-12        6.607e-12
+   25.0000        1
+
+XOR3
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  3.190e-06        5.060e-10        5.178e-10        1.174e-11
+  1.006e-09        1.019e-09        1.302e-11        1.238e-11
+   25.0000        1
+
+XOR3, INV LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  3.485e-06        5.060e-10        5.195e-10        1.347e-11
+  1.006e-09        1.021e-09        1.468e-11        1.408e-11
+   25.0000        1
+
+
+AND, INV LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  8.227e-07        5.055e-10        5.179e-10        1.232e-11
+  1.006e-09        1.013e-09        7.495e-12        9.910e-12
+   25.0000        1
+
+AND, no LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  6.222e-07        5.055e-10        5.165e-10        1.095e-11
+  1.006e-09        1.012e-09        6.425e-12        8.689e-12
+   25.0000        1
+
+
+DEL025, no LOAD
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  9.444e-07        5.055e-10        5.118e-10        6.294e-12
+  1.006e-09        1.012e-09        6.281e-12        6.288e-12
+   25.0000        1
+
+
+.TITLE '***********************************************************************'
+ avgpowerl1       tplhs            tplhe            tplh
+ tphls            tphle            tphl             tp_inv
+ temper           alter#
+  3.157e-06        5.060e-10        5.244e-10        1.833e-11
+  1.006e-09        1.025e-09        1.839e-11        1.836e-11
+   25.0000        1
+
+
+
+
+
+
+
+
+

@@ -11,7 +11,10 @@ class Design :
     def __init__(self):
         self.modules = {}
         self.gate_lib = {}
+        
         self.gate_net = NetWork()
+        self.wire_driver = {} # wire_name : [driver_gate_name]
+
         self.top_design = ''
 
     def printModulesLib(self):
@@ -532,10 +535,22 @@ class Design :
             print(f'Error : Module {module_name} not in Lib.')
             return
         module = self.modules[module_name]
-        if not port_name in module.port_dict :
-            print(f'Error : Port {port_name} not in Module {module_name}.')
-            return
-        port = module.port_dict[port_name]
+        inst_name = port_name.split('.')[0]
+        port_name = port_name.split('.')[1]
+        if inst_name == 'self' : 
+            if not port_name in module.port_dict :
+                print(f'Error : Port {port_name} not in Module {module_name}.')
+                return
+            port = module.port_dict[port_name]
+        else : 
+            if not inst_name in module.inst_dict : 
+                print(f'Error : Inst {inst_name} not in Module {module_name}.')
+                return
+            inst = module.inst_dict[inst_name]
+            if not port_name in inst.port_dict :
+                print(f'Error : Port {port_name} not in Inst {module_name}.{inst.name}')
+                return
+            port = inst.port_dict[port_name]
         if port_pos == None :
             for port_pos in range(port.lsb, port.msb+1) :
                 if port.wire_connect[port_pos] != None :
@@ -587,14 +602,28 @@ class Design :
             print(f'Error : Module {module_name} not in Lib.')
             return
         module = self.modules[module_name]
-        if not port_name in module.port_dict :
-            print(f'Error : Port {port_name} not in Module {module_name}.')
-            return
-        port = module.port_dict[port_name]
+
+        inst_name = port_name.split('.')[0]
+        port_name = port_name.split('.')[1]
+        if inst_name == 'self' : 
+            if not port_name in module.port_dict :
+                print(f'Error : Port {inst_name}.{port_name} not in Module {module_name}.')
+                return
+            port = module.port_dict[port_name]
+        else : 
+            if not inst_name in module.inst_dict : 
+                print(f'Error : Inst {inst_name} not in Module {module_name}.')
+                return
+            inst = module.inst_dict[inst_name]
+            if not port_name in inst.port_dict :
+                print(f'Error : Port {inst_name}.{port_name} not in Inst {module_name}.{inst.name}')
+                return
+            port = inst.port_dict[port_name]
+
 
         if port_pos == None :
             if len(wire_connect_list) != (port.msb - port.lsb + 1) :
-                print(f'Error : Port {port_name} connect length error.')
+                print(f'Error : Port {inst_name}.{port_name} connect length error.')
                 return
             for port_pos in range(port.lsb, port.msb+1) :
                 wire_con = wire_connect_list[port_pos - port.lsb]
@@ -608,16 +637,16 @@ class Design :
                     print(f'Error : Wire {wire_name} pos {wire_pos} out of range.')
                     continue
                 if port.wire_connect[port_pos] != None :
-                    print(f'Error : Port {port_name}[{port_pos}] already connected.')
+                    print(f'Error : Port {inst_name}.{port_name}[{port_pos}] already connected.')
                     continue
                 port.wire_connect[port_pos] = [wire_name, wire_pos]
-                wire.connect[wire_pos].append( ['self.'+port.name, port_pos] )
+                wire.connect[wire_pos].append( [inst_name+'.'+port.name, port_pos] )
         else :
             if port_pos < port.lsb or port_pos > port.msb :
-                print(f'Error : Port {port_name} pos {port_pos} out of range.')
+                print(f'Error : Port {inst_name}.{port_name} pos {port_pos} out of range.')
                 return
             if len(wire_connect_list) != 1 :
-                print(f'Error : Port {port_name} connect length error.')
+                print(f'Error : Port {inst_name}.{port_name} connect length error.')
                 return
             wire_con = wire_connect_list[0]
             wire_name = wire_con[0]
@@ -630,10 +659,93 @@ class Design :
                 print(f'Error : Wire {wire_name} pos {wire_pos} out of range.')
                 return
             if port.wire_connect[port_pos] != None :
-                print(f'Error : Port {port_name}[{port_pos}] already connected.')
+                print(f'Error : Port {inst_name}.{port_name}[{port_pos}] already connected : {port.wire_connect[port_pos]}.')
                 return
             port.wire_connect[port_pos] = [wire_name, wire_pos]
-            wire.connect[wire_pos].append( ['self.'+port.name, port_pos] )
+            wire.connect[wire_pos].append( [inst_name+'.'+port.name, port_pos] )
+        # print(f'{module_name}.{inst_name}.{port_name}[{port_pos}] connected : {port.wire_connect[port_pos]}.')
+
+    def connectPortToPort(self, module_name, a_port_name, a_port_pos, b_port_name, b_port_pos) :
+        if not module_name in self.modules :
+            print(f'Error : Module {module_name} not in Lib.')
+            return
+        module = self.modules[module_name]
+
+        a_port_inst = a_port_name.split('.')[0]
+        a_port_name = a_port_name.split('.')[1]
+        if a_port_inst == 'self' : 
+            if not a_port_name in module.port_dict :
+                print(f'Error : Port {a_port_name} not in Module {module.name}.')
+                return
+            a_port = module.port_dict[a_port_name] 
+        else :      
+            if not a_port_inst in module.inst_dict :
+                    print(f'Error : Inst {a_port_inst} not in Module {module_name}.')
+                    return
+            a_inst = module.inst_dict[a_port_inst]        
+            if not a_port_name in a_inst.port_dict :
+                print(f'Error : Port {a_port_name} not in Inst {module.name}.{a_inst.name}[{a_inst.module}].')
+                return
+            a_port = a_inst.port_dict[a_port_name]        
+
+        b_port_inst = b_port_name.split('.')[0]
+        b_port_name = b_port_name.split('.')[1]
+        if b_port_inst == 'self' :       
+            if not b_port_name in module.port_dict :
+                print(f'Error : Port {b_port_name} not in Module {module.name}.')
+                return
+            b_port = module.port_dict[b_port_name] 
+        else : 
+            if not b_port_inst in module.inst_dict :
+                print(f'Error : Inst {b_port_inst} not in Module {module_name}.')
+                return
+            b_inst = module.inst_dict[b_port_inst]        
+            if not b_port_name in b_inst.port_dict :
+                print(f'Error : Port {b_port_name} not in Inst {module.name}.{b_inst.name}[{b_inst.module}].')
+                return
+            b_port = b_inst.port_dict[b_port_name] 
+
+        a_wire = a_port.wire_connect[a_port_pos]
+        b_wire = b_port.wire_connect[b_port_pos]
+
+        connect_wire = None
+        if a_wire != None and b_wire != None : 
+            print(f'Error : Port {a_port_name}[{a_port_pos}] and Port {b_port_name}{b_port_pos} conflict.')
+            return
+
+        if a_wire != None : 
+            connect_wire = a_wire
+        if b_wire != None : 
+            connect_wire = b_wire
+        
+        if connect_wire == None : 
+            # Add New Wire
+            new_wire_name = ''
+            for i in range(1000) : 
+                _tmp = f'n{i}'
+                if not _tmp in module.wire_dict : 
+                    new_wire_name = _tmp
+                    break
+            if new_wire_name == '' : 
+                print('Error : Cant find new wire name.')
+                return
+            self.addModuleWire(module_name=module_name,
+                               wire_name=new_wire_name,
+                               msb=0,
+                               lsb=0)
+            connect_wire = [new_wire_name, 0]
+        if a_wire == None : 
+            self.connectPortToWire(module_name=module_name,
+                               port_name=a_port_inst+'.'+a_port_name,
+                               wire_connect_list=[connect_wire],
+                               port_pos=a_port_pos)
+        if b_wire == None : 
+            self.connectPortToWire(module_name=module_name,
+                               port_name=b_port_inst+'.'+b_port_name,
+                               wire_connect_list=[connect_wire],
+                               port_pos=b_port_pos)
+        # print(f'connect {module_name}.{a_port_inst}.{a_port_name}[{a_port_pos}] -> {module_name}.{b_port_inst}.{b_port_name}[{b_port_pos}]')
+        # input('Waiting...')
 
     # Gate NetWork Operation
     def getGateNetwork(self) :
@@ -645,33 +757,31 @@ class Design :
 
         def gatesearch(m : Module):
 
-            iport_c = {}
-            oport_c = {}
-            cport = []
-            inst_iport_c = {}
-            inst_oport_c = {}
-            inst_cport = []
+            # init
+            iport_c = {} # input port connect : {port_name : [[gate, port], ...]}
+            oport_c = {} # output port connect : {port_name : [[gate, port], ...]}
+            cport = [] # connect port : [[iport, oport], ...]
+            iport_loadwire = {} # input port load wire : {port_name : [wire, ...]}
+            inst_iport_c = {} # instance input port connect : {port_name : [[gate, port], ...]}
+            inst_oport_c = {} # instance output port connect : {port_name : [[gate, port], ...]}
+            inst_iport_loadwire = {} # instance input port load wire : {port_name : [wire, ...]}
+            inst_cport = [] # instance connect port : [[iport, oport], ...]
             # search inst
             
             for inst in m.inst_dict.values() : 
                 module_name = inst.module
-                #port_connect : {port_name : gate_list}
                 if module_name in self.modules:
-                    _t_iport_c, _t_oport_c, _t_cport = gatesearch(self.modules[module_name])
+                    _t_iport_c, _t_oport_c, _t_cport, _t_iport_loadwire = gatesearch(self.modules[module_name])
                     
-                    _tmp = [x for x in _t_oport_c.keys()]
-                    for k in _tmp:
-                        _t_oport_c[inst.name+'.'+k] = _t_oport_c.pop(k)
-                    _tmp = [x for x in _t_iport_c.keys()]
-                    for k in _tmp:
-                        _t_iport_c[inst.name+'.'+k] = _t_iport_c.pop(k)
                     
-                    for k in _t_cport:
-                        for i in range(len(k)):
-                            k[i] = inst.name + '.' + k[i]
+                    _t_oport_c = {inst.name + '.' + k: v for k, v in _t_oport_c.items()}
+                    _t_iport_c = {inst.name + '.' + k: v for k, v in _t_iport_c.items()}
+                    _t_cport = [ [inst.name + '.' + k[0], inst.name + '.' + k[1]] for k in _t_cport ]
+                    _t_iport_loadwire = {inst.name + '.' + k: v for k, v in _t_iport_loadwire.items()}
 
                     inst_iport_c = {**inst_iport_c, **_t_iport_c}
                     inst_oport_c = {**inst_oport_c, **_t_oport_c}
+                    inst_iport_loadwire = {**inst_iport_loadwire, **_t_iport_loadwire}
                     inst_cport.extend(_t_cport)
 
                 elif module_name in self.gate_lib:
@@ -679,10 +789,8 @@ class Design :
                     gate_module = self.gate_lib[module_name]
                     gate_name = m.name + '.' + inst.name
                     new_gate = Gate(name=gate_name, 
-                                    module=module_name,
+                                    module=gate_module,
                                     loc=m,
-                                    connect_in=[],
-                                    connect_out=[],
                                     gate_attr=GateAttr(gate_module.attr)) 
                     self.gate_net.addGate(new_gate)
                     
@@ -690,11 +798,12 @@ class Design :
                     _t_iport_c = {}
                     _t_oport_c = {}
                     for _port in gate_module.port_dict.values():
+                        # single bit port only
                         port_name = inst.name + '.' + _port.name + f'[0]'
                         if _port.direction :
-                            _t_oport_c[port_name] = [gate_name]
+                            _t_oport_c[port_name] = [[gate_name, _port.name]]
                         else :
-                            _t_iport_c[port_name] = [gate_name]
+                            _t_iport_c[port_name] = [[gate_name, _port.name]]
 
                     inst_iport_c = {**inst_iport_c, **_t_iport_c}
                     inst_oport_c = {**inst_oport_c, **_t_oport_c}
@@ -718,16 +827,18 @@ class Design :
 
 
             # port connect
-            oport_connect_tree = {}
-            iport_connect_tree = {}
+            oport_loading_port = {}
+            iport_driving_port = {}
 
             #init
             for i in inst_iport_c : 
-                iport_connect_tree[i] = ''
+                iport_driving_port[i] = None
             for i in inst_oport_c : 
-                oport_connect_tree[i] = []
+                oport_loading_port[i] = []
 
             for w in m.wire_dict.values():
+                for i in range(w.lsb, w.msb+1) :
+                    self.wire_driver[f'{m.name}.{w.name}[{i}]'] = None   # add Wire to Wire driver dict
                 for _ in w.connect:
                     iport_list = []
                     oport_list = []
@@ -748,84 +859,279 @@ class Design :
                         print(f'Error (04) : wire {m.name}.{w.name} No Driven.')
 
                     for op in oport_list: 
-                        if op in oport_connect_tree:  
-                            oport_connect_tree[op].extend( iport_list )
+                        if op in oport_loading_port:  
+                            oport_loading_port[op].extend( iport_list )
                         else:
-                            oport_connect_tree[op] = iport_list
+                            oport_loading_port[op] = iport_list
                     
                         for ip in iport_list : 
-                            iport_connect_tree[ip] = op
+                            iport_driving_port[ip] = op
                     
             
             # Add Connect to Port Tree
             
             for i in inst_cport :
                 # cport : [iport, oport]
-                for j in oport_connect_tree.values():
-                    if i[0] in j:
-                        j.append(i[1])
-                iport_connect_tree[i[1]] = i[0]
+                iport_driving_port[i[1]] = i[0]
 
+            # maintain port driving/loading
+            def update_driving_port(port_name):
+                driving_port = iport_driving_port[port_name]
+                if driving_port not in iport_driving_port :
+                    return driving_port
+                iport_driving_port[port_name] = update_driving_port(driving_port)
+                return iport_driving_port[port_name]
+            for i in iport_driving_port :
+                driving_port =  update_driving_port(i)
+                if i in oport_loading_port :
+                    oport_loading_port[driving_port].extend( oport_loading_port[i] )
+            
             # Add Gate Connect
-
-            def find_root_port(g, port_tree):
-                if g in port_tree :
-                    return find_root_port(port_tree[g], port_tree) 
-                else :
-                    return g
-
-            def find_gate(g, port_tree, port_gate):
-                gate_list = []
-                if g in port_tree:
-                    port_list = port_tree[g]
-                    for p in port_list :
-                        gate_list.extend( find_gate(p, port_tree, port_gate) )
-                if g in port_gate:
-                    gate_list.extend( port_gate[g] )
-                return gate_list
-
-            for i in oport_connect_tree : 
-                if len(inst_oport_c[i]) != 0 : 
-                    if len(inst_oport_c[i]) != 1:
-                        print('Error : Too Many Gates for a out port.')
+            for driving_port in oport_loading_port :
+                inst_name = driving_port.split('.')[0]
+                if inst_name == 'self' :
+                    # Add connect from output port to input port
+                    continue
+                else : 
+                    if len(inst_oport_c[driving_port]) > 1 :
+                        print('Error : Too Many Driving Gates for a out port.')
+                        print(f'Driving Gates: {inst_oport_c[driving_port]}')
+                    elif len(inst_oport_c[driving_port]) == 0 :
+                        continue
                     else:
-                        o_gate = inst_oport_c[i][0]
-                        for i_gate in find_gate(i, oport_connect_tree, inst_iport_c) :
-                            self.gate_net.addConnectAB(o_gate, i_gate) 
+                        driver_gate_name = inst_oport_c[driving_port][0][0]
+                        driver_port_name = inst_oport_c[driving_port][0][1]
+                        for loading_port in oport_loading_port[driving_port] :
+                            if len(inst_iport_c[loading_port]) == 0 :
+                                continue
+                            for gate_attr in inst_iport_c[loading_port] :
+                                load_gate_name = gate_attr[0]
+                                load_port_name = gate_attr[1]
+                                self.gate_net.addConnectA2B(gateA=driver_gate_name, 
+                                                      gateB=load_gate_name, 
+                                                      a_port_name=driver_port_name, 
+                                                      b_port_name=load_port_name)
+
+            # Updated wire driver
+            for w in m.wire_dict.values():
+                for i in range(w.lsb, w.msb+1) :
+                    wire_name = f'{m.name}.{w.name}[{i}]'
+                    if w.connect[i] == [] :
+                        # print(f'Warning : Wire {wire_name} No Connect.')
+                        self.wire_driver[wire_name] = None
+                    else :
+                        port_name = w.connect[i][0][0] + f'[{w.connect[i][0][1]}]'
+                        if port_name in iport_driving_port :
+                            driving_port = iport_driving_port[port_name]
+                        else : 
+                            driving_port = port_name
+                        if driving_port in inst_oport_c :
+                            if len(inst_oport_c[driving_port]) > 1 :
+                                print('Error : Too Many Driving Gates for a out port.')
+                                print(f'Driving Gates: {inst_oport_c[driving_port]}')
+                            elif len(inst_oport_c[driving_port]) == 0 :
+                                # print(f'Warning : Wire {wire_name} Driven by Port {driving_port} No Connect Gate.')
+                                self.wire_driver[wire_name] = None
+                            else :
+                                self.wire_driver[wire_name] = inst_oport_c[driving_port][0] # [gate_name, port_name]
+                        else :
+                            self.wire_driver[wire_name] = None
+            
+            # update Inst wire driver
+            for inst in m.inst_dict.values() :
+                for port in inst.port_dict.values() :
+                    if port.direction == 1 :
+                        # output port
+                        continue
+                    for i in range(port.lsb, port.msb+1) :
+                        port_name = inst.name + '.' + port.name + f'[{i}]'
+                        driver_gate = None
+                        if port.wire_connect[i] != None :
+                            wire_name = port.wire_connect[i][0]
+                            wire_pos = port.wire_connect[i][1]
+                            wire_name = f'{m.name}.{wire_name}[{wire_pos}]'
+                            driver_gate = self.wire_driver[wire_name]
+                        if port_name in inst_iport_loadwire :
+                            for wire in inst_iport_loadwire[port_name] :
+                                self.wire_driver[wire] = driver_gate
+
+
 
             # Update I/O Port Gate
-
-            for i in iport_c:
-                iport_c[i] = find_gate(i, oport_connect_tree, inst_iport_c)
+            for iport in iport_c:
+                driving_port_list = oport_loading_port[iport]
+                for dp in driving_port_list :
+                    iport_c[iport].extend( inst_iport_c[dp] )
             
-            for i in oport_c:
-                rp = find_root_port(i, iport_connect_tree)
-                oport_c[i] = inst_oport_c[rp]
-                if rp in iport_c: 
-                    cport.append([rp[5:], i[5:]])
-            _tmp = [x for x in iport_c.keys()]
-            for _t in _tmp:
-                iport_c[_t[5:]] = iport_c.pop(_t)
-            _tmp = [x for x in oport_c.keys()]
-            for _t in _tmp:
-                oport_c[_t[5:]] = oport_c.pop(_t)
+            for oport in oport_c:
+                driving_port = iport_driving_port[oport]
+                oport_c[oport] = inst_oport_c[driving_port]
+                
+                inst_name = driving_port.split('.')[0]
+                if inst_name == 'self' :
+                    cport.append( [driving_port, oport] )
 
-            # print(f'module {m.name}')
-            # print('iport::\n', iport_connect_tree)
-            # print('oport::\n', oport_connect_tree)
-            # print(iport_c)
-            # print(oport_c)
-            # print(cport)
-            return iport_c, oport_c, cport
+            
+            # update input port load wire
+            for iport in iport_c :
+                wire_list = []
+                # add straight inst load wire
+                for lport in oport_loading_port[iport] :
+                    if lport in inst_iport_loadwire :
+                        wire_list.extend( inst_iport_loadwire[lport] )
+                # add self load wire
+                port_name = iport.split('.')[1].split('[')[0]
+                port_pos = int(iport.split('[')[1].split(']')[0])
+                if port_name in m.port_dict :
+                    port = m.port_dict[port_name]
+                    if port.wire_connect[port_pos] != None :
+                        wire_list.append(f"{m.name}.{port.wire_connect[port_pos][0]}[{port.wire_connect[port_pos][1]}]")
+                iport_loadwire[iport] = wire_list
+            
 
-        gatesearch(self.modules[self.top_design])
+            # remove self. from port name
+            iport_c = {k[5:]: v for k, v in iport_c.items()} 
+            oport_c = {k[5:]: v for k, v in oport_c.items()}
+            iport_loadwire = {k[5:]: v for k, v in iport_loadwire.items()}
+            cport = [ [k[5:], v[5:]] for k, v in cport ]
+
+            
+
+
+
+            return iport_c, oport_c, cport, iport_loadwire
+
+        iport_c, oport_c, cport, iport_loadwire = gatesearch(self.modules[self.top_design])
+
+        for iport in iport_loadwire :
+            for wire in iport_loadwire[iport] :
+                self.wire_driver[wire] = ['IDEAL_INPUT', None] # set ideal input gate as driver
+
         print(f'Gate Network Generated, Total {self.gate_net.getSize()} Gates.')
+        print(f'Total wire Info: {len(self.wire_driver)} Wires.')
+    
+    def checkGateNetwork(self):
+        if self.gate_net.checkCircular() :
+            print('Error : Gate Network has Circular Connection.')
 
+        error_cnt = 0
+        for w in self.wire_driver :
+            if self.wire_driver[w] == None :
+                module_name = w.split('.')[0]
+                wire_name = w.split('.')[1].split('[')[0]
+                wire_pos = int(w.split('[')[1].split(']')[0])
+                if not module_name in self.modules :
+                    print(f'Error : Wire {w} in Module {module_name} not in Lib.')
+                    error_cnt = error_cnt + 1
+                    continue
+                module = self.modules[module_name]
+                if not wire_name in module.wire_dict :
+                    print(f'Error : Wire {w} in Module {module_name} not in Lib.')
+                    error_cnt = error_cnt + 1
+                    continue
+                wire = module.wire_dict[wire_name]
+                if wire_pos < wire.lsb or wire_pos > wire.msb :
+                    print(f'Error : Wire {w} pos {wire_pos} out of range.')
+                    error_cnt = error_cnt + 1
+                    continue
+                if wire.connect[wire_pos] == [] :
+                    print(f'Warning : Wire {w} No Connect.')
+                    continue
+        if error_cnt == 0 :
+            print('Gate Network Check Passed.')
+        else :
+            print(f'Gate Network Check Found {error_cnt} Errors.')
+    
+    def printWireDriver(self):
+        for w in self.wire_driver :
+            print(f'Wire {w} Driver Gate: {self.wire_driver[w]}')
+    
+    def printModulePortDriver(self, module_name):
+        if not module_name in self.modules :
+            print(f'Error : Module {module_name} not in Lib.')
+            return
+        module = self.modules[module_name]
+        for port in module.port_dict.values() :
+            for i in range(port.lsb, port.msb+1) :
+                port_name = module.name+'.'+port.name+f'[{i}]'
+                driver_gate = None
+                if port.wire_connect[i] != None :
+                    wire_name = port.wire_connect[i][0]
+                    wire_pos = port.wire_connect[i][1]
+                    wire_name = f'{module.name}.{wire_name}[{wire_pos}]'
+                    driver_gate = self.wire_driver[wire_name]
+                print(f'Port {port_name} Driver Gate: {driver_gate}')
 
-    def netAnnotation(self, saifpath, inst_path):
+    def runSTA(self, result_log : bool = False):
+        self.gate_net.staticTimingAnalysis(result_log)
+    
+    def getMoudleOutputDelay(self, module_name, port_name=None, port_pos=None):
+        if not module_name in self.modules :
+            print(f'Error : Module {module_name} not in Lib.')
+            return
+        module = self.modules[module_name]
+        if port_name == None :
+            delay_dict = {}
+            for port in module.port_dict.values() :
+                if port.direction == 1 :
+                    for i in range(port.lsb, port.msb+1) :
+                        gate_port_name = module.name+'.'+port.name+f'[{i}]'
+                        wire_con = port.wire_connect[i]
+                        wire_name = f'{module.name}.{wire_con[0]}[{wire_con[1]}]'
+                        if wire_name in self.wire_driver :
+                            drive_gate = self.wire_driver[wire_name][0]
+                            drive_port = self.wire_driver[wire_name][1]
+                            drive_gate = self.gate_net.gate_dict.get(drive_gate, None)
+                            delay_dict[gate_port_name] = \
+                                drive_gate.attr.outport_delay_in_network[drive_port] if drive_gate != None else None
+                        else :
+                            delay_dict[gate_port_name] = None
+            return delay_dict
+        else :
+            if not port_name in module.port_dict :
+                print(f'Error : Port {port_name} not in Module {module_name}.')
+                return
+            port = module.port_dict[port_name]
+            if port.direction != 1 :
+                print(f'Error : Port {port_name} is not output port.')
+                return
+            if port_pos == None :
+                delay_dict = {}
+                for i in range(port.lsb, port.msb+1) :
+                    gate_port_name = module.name+'.'+port.name+f'[{i}]'
+                    wire_con = port.wire_connect[i]
+                    wire_name = f'{module.name}.{wire_con[0]}[{wire_con[1]}]'
+                    if wire_name in self.wire_driver :
+                        drive_gate = self.wire_driver[wire_name][0]
+                        drive_port = self.wire_driver[wire_name][1]
+                        drive_gate = self.gate_net.gate_dict.get(drive_gate, None)
+                        delay_dict[gate_port_name] = \
+                            drive_gate.attr.outport_delay_in_network[drive_port] if drive_gate != None else None
+                    else :
+                        delay_dict[gate_port_name] = None
+                return delay_dict
+            else :
+                if port_pos < port.lsb or port_pos > port.msb :
+                    print(f'Error : Port {port_name} pos {port_pos} out of range.')
+                    return
+                gate_port_name = module.name+'.'+port.name+f'[{port_pos}]'
+                wire_con = port.wire_connect[port_pos]
+                wire_name = f'{module.name}.{wire_con[0]}[{wire_con[1]}]'
+                if wire_name in self.wire_driver :
+                    drive_gate = self.wire_driver[wire_name][0]
+                    drive_port = self.wire_driver[wire_name][1]
+                    drive_gate = self.gate_net.gate_dict.get(drive_gate, None)
+                    return drive_gate.attr.outport_delay_in_network[drive_port] \
+                        if drive_gate != None else None
+                else :
+                    return None
+
+    def netAnnotation(self, saifpath, inst_path, cycles):
         '''
         Annotate the gate network with the saif file information.
             saifpath : the path of the saif file folder, should contain func.saif and glitch.saif
+                func.saif : the saif file of the functional simulation
+                glitch.saif : the saif file of the glitch simulation
             inst_path : the path of the top module instance in the saif file
                 e.g. gfmul_tb/mul_x/mul_x
         '''
@@ -859,12 +1165,12 @@ class Design :
                     funcnet = funcinfo['cells'][inst.name]['net_list']
                     glitchnet = glitchinfo['cells'][inst.name]['net_list']
                     if 'Z' in funcnet : 
-                        g.attr.func_tr = funcnet['Z']['tc']
-                        g.attr.glitch_tr = glitchnet['Z']['tc']
+                        g.attr.func_tr = funcnet['Z']['tc'] / cycles
+                        g.attr.glitch_tr = glitchnet['Z']['tc'] / cycles
                         g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
                     else :
-                        g.attr.func_tr = funcnet['ZN']['tc']
-                        g.attr.glitch_tr = glitchnet['ZN']['tc']
+                        g.attr.func_tr = funcnet['ZN']['tc'] / cycles
+                        g.attr.glitch_tr = glitchnet['ZN']['tc'] / cycles
                         g.attr.glitch_tr = g.attr.glitch_tr - g.attr.func_tr
                     
                     annotate_cnt = annotate_cnt + 1

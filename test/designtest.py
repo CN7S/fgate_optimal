@@ -17,6 +17,17 @@ saif_path = 'test/saif'
 
 mydesign = Design()
 mydesign.addGateLibFromFloder(gatelib_path)
+
+# dump json lib file
+lib_dict = {}
+for gate_module in mydesign.gate_lib.values() : 
+    gate_module.selfUpdated()
+    lib_dict[gate_module.name] = gate_module.attr.dumpToDict()
+import json
+with open('./gate.json', 'w') as f:
+    json.dump(lib_dict, f, indent=4)
+
+
 mydesign.addModuleFromFloder(modulelib_path)
 mydesign.setTopDesign(top_design)
 mydesign.uniqueModules()
@@ -40,10 +51,30 @@ mydesign.linkModuleInst()
 
 # mydesign.modules[mydesign.top_design].dumpjson('log')
 mydesign.genGateNetwork()
-print(mydesign.gate_net.checkCircular())
-input('Press Enter to continue...')
-mydesign.gate_net.staticTimingAnalysis()
+mydesign.checkGateNetwork()
+mydesign.runSTA(result_log=False)
+delay_dict = mydesign.getMoudleOutputDelay('OKA_16bit_0')
+ypoints = []
+for k, v in delay_dict.items():
+    ypoints.append(v)
+    print(f'Output {k} : Delay = {v:.2e}')
+
 mydesign.gate_net.printStatus()
+import matplotlib.pyplot as plt
+xpoints = [x for x in range(len(delay_dict))]
+plt.scatter(xpoints, ypoints)
+plt.show()
+
+
+# mydesign.gate_net.gate_dict['OKA_8bit_0_0.U22'].status()
+# mydesign.gate_net.gate_dict['OKA_8bit_2_0.U22'].status()
+
+# input('Press Enter to continue...')
+# mydesign.printWireDriver()
+# mydesign.printModulePortDriver('OKA_128bit_0')
+# input('Press Enter to continue...')
+# mydesign.gate_net.staticTimingAnalysis()
+# mydesign.gate_net.printStatus()
 
 # mydesign.netAnnotation(saif_path, 'gfmul_tb/mul_x/mul_x')
 

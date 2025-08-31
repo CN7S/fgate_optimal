@@ -24,16 +24,26 @@ class NetWork():
             if gate.name not in visited:
                 visited[gate.name] = True
                 rec_stack[gate.name] = True
-                path.append(gate.name)
-                for g in gate.connect_out:
-                    if g.name not in visited:
-                        dfs(g, visited, rec_stack, path, circulars)
-                    elif g.name in rec_stack:
-                        # found a back edge
-                        cycle_start_index = path.index(g.name)
-                        circulars.append(path[cycle_start_index:] + [g.name])
+                for oport in gate.output_port_load:
+                    for gate_attr in gate.output_port_load[oport]:
+                        next_gate = gate_attr[0]
+                        next_port = gate_attr[1]
+                        path_node = gate.name + '.' + oport + '->' + next_gate.name + '.' + next_port
+                        path.append(path_node)
+                        if next_gate.name not in visited:
+                            dfs(next_gate, visited, rec_stack, path, circulars)
+                        elif next_gate.name in rec_stack:
+                            # Found a back edge, record the circular path
+                            cycle_start_index = None
+                            for idx, p in enumerate(path):
+                                if p.startswith(next_gate.name + '.'):
+                                    cycle_start_index = idx
+                                    break
+                            if cycle_start_index is not None:
+                                circular_path = path[cycle_start_index:]
+                                circulars.append(circular_path)
+                        path.pop()
             rec_stack.pop(gate.name, None)
-            path.pop()
         
         visited = {}
         rec_stack = {}
@@ -42,8 +52,6 @@ class NetWork():
             if g.name not in visited:
                 dfs(g, visited, rec_stack, [], circulars)
         return circulars
-
-
 
     def checkCircular(self):
         '''
@@ -60,39 +68,51 @@ class NetWork():
             return True
         return False
 
-    def staticTimingAnalysis(self):
+    def staticTimingAnalysis(self, result_log : bool = False):
         '''
         Do static timing analysis for the network
-        Use Dijkstra algorithm to find the longest path delay
+        Only to calculate gate delay in network
         '''
-        def dijistra(gate : Gate, visited : dict, time_dict : dict):
-            if gate.name in visited:
-                return
-            visited[gate.name] = True
-            max_delay = 0
-            for g in gate.connect_in:
-                if g.name not in time_dict:
-                    dijistra(g, visited, time_dict)
-                if time_dict[g.name] > max_delay:
-                    max_delay = time_dict[g.name]
-            time_dict[gate.name] = max_delay + gate.attr.delay
-        
-        visited = {}
-        time_dict = {}
-        for g in self.gate_dict.values():
-            if g.name not in visited:
-                dijistra(g, visited, time_dict)
-        for gname in time_dict:
-            self.gate_dict[gname].attr.delay_in_network = time_dict[gname]
+        # Initialize delays
+        for gate in self.gate_dict.values() :
+            for oport in gate.output_port_load : 
+                gate.attr.outport_delay_in_network[oport] = 0
 
-        self.max_delay = 0
-        for g in self.gate_dict.values():
-            if g.attr.delay_in_network > self.max_delay:
-                self.max_delay = g.attr.delay_in_network
+        # Process gates in topological order
+        processed = set()
         
-        print('Static Timing Analysis Result:')
-        for g in self.gate_dict.values():
-            print(f'Gate {g.name} : Delay in network = {g.attr.delay_in_network}')
+        def process_gate(gate_name):
+            if gate_name in processed:
+                return self.gate_dict[gate_name].attr.outport_delay_in_network
+            
+            gate = self.gate_dict[gate_name]
+            max_delay = self.gate_dict[gate_name].attr.outport_delay_in_network
+
+            # Check all input ports
+            for inport in gate.input_port_driver:
+                gate_info =  gate.input_port_driver[inport]
+                if gate_info != None : 
+                    driver_gate = gate_info[0]
+                    driver_port = gate_info[1]
+                    input_delay = process_gate(driver_gate.name)
+                    input_delay = input_delay[driver_port]
+                else:
+                    input_delay = 0
+                for oport in gate.output_port_load : 
+                    output_delay = input_delay + gate.getDelayFromInputToOutput(inport, oport)
+                    max_delay[oport] = max(max_delay[oport], output_delay)
+
+            processed.add(gate_name)
+            return max_delay
+        
+        # Process all gates
+        for gate_name in self.gate_dict:
+            delay = process_gate(gate_name)
+            for dt in delay.values() : 
+                self.max_delay = max(self.max_delay, dt)
+        
+        if result_log:
+            print("Static Timing Analysis Results:")
 
 
     def getSize(self):
@@ -101,9 +121,9 @@ class NetWork():
     def addGate(self, g : Gate):
         self.gate_dict[g.name] = g
     
-    def addConnectAB(self, gateA : str, gateB : str):
+    def addConnectA2B(self, gateA: str, gateB: str, a_port_name: str, b_port_name: str):
         gA = self.gate_dict[gateA]
         gB = self.gate_dict[gateB]
-        gA.addout(gB)
-        gB.addin(gA)
+        gA.addOutPortLoad(a_port_name, gB, b_port_name)
+        gB.addInPortDriver(b_port_name, gA, a_port_name)
 
