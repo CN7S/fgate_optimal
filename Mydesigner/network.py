@@ -9,9 +9,50 @@ class NetWork():
     def clear(self):
         self.gate_dict = {}
 
+    def getGateTr(self):
+        total_tr = 0
+        for gate in self.gate_dict.values() : 
+            total_tr = total_tr + gate.attr.glitch_tr
+        return total_tr
+
+    def netStatistic(self):
+        def getGateType(net : NetWork):
+            s = {}
+            g_dict = net.gate_dict
+            for g in g_dict.values():
+                if g.module in s : 
+                    s[g.module] = s[g.module] + 1
+                else:
+                    s[g.module] = 1
+            return s
+        def getGlitch(net: NetWork, step_len):
+            s = {}
+            g_dict = net.gate_dict
+            for g in g_dict.values():
+                glitch_attr = g.attr.glitch_tr
+                gtype = f'level{int(glitch_attr // step_len)}'
+                if gtype in s : 
+                    s[gtype][0] = s[gtype][0] + 1
+                    s[gtype][1] = s[gtype][1] + glitch_attr
+                else:
+                    s[gtype] = [1, glitch_attr]
+            return s
+        
+            
+        total_gate = len(self.gate_dict)
+        gate_type_state = getGateType(self)
+        glitch_state = getGlitch(self, 50)
+        state_dict = {
+            'total_gate' : total_gate,
+            'gate_type_state': gate_type_state,
+            'glitch_state': glitch_state
+        }
+        return state_dict
+
     def printStatus(self):
         print(f'Network Size : {self.getSize()} gates.')
         print(f'Max Delay : {self.max_delay} .')
+        print(f'Total transition rate : {self.getGateTr()}.')
 
 
     def findAllCircular(self) -> list:

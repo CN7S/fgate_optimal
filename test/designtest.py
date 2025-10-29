@@ -33,6 +33,7 @@ mydesign.setTopDesign(top_design)
 mydesign.uniqueModules()
 mydesign.linkModuleInst()
 
+mydesign.dumpAllModule('ttt', True)
 #remove some module ports
 # remove_ports = ['clk', 'rst_n', 'C_g1']
 # for modulename in mydesign.modules:
@@ -53,19 +54,25 @@ mydesign.linkModuleInst()
 mydesign.genGateNetwork()
 mydesign.checkGateNetwork()
 mydesign.runSTA(result_log=False)
-delay_dict = mydesign.getMoudleOutputDelay('OKA_16bit_0')
-ypoints = []
-for k, v in delay_dict.items():
-    ypoints.append(v)
-    print(f'Output {k} : Delay = {v:.2e}')
+# delay_dict = mydesign.getMoudleOutputDelay('OKA_16bit_0')
+# ypoints = []
+# for k, v in delay_dict.items():
+#     ypoints.append(v)
+#     print(f'Output {k} : Delay = {v:.2e}')
 
-mydesign.gate_net.printStatus()
-import matplotlib.pyplot as plt
-xpoints = [x for x in range(len(delay_dict))]
-plt.scatter(xpoints, ypoints)
-plt.show()
+# mydesign.gate_net.printStatus()
+# import matplotlib.pyplot as plt
+# xpoints = [x for x in range(len(delay_dict))]
+# plt.scatter(xpoints, ypoints)
+# plt.show()
 
-
+mydesign.gate_net.gate_dict['reduction_0.U1'].status()
+mydesign.gate_net.gate_dict['reduction_0.U98'].status()
+mydesign.gate_net.gate_dict['reduction_0.U212'].status()
+mydesign.gate_net.gate_dict['reduction_0.U252'].status()
+mydesign.gate_net.gate_dict['reduction_0.U263'].status()
+mydesign.gate_net.gate_dict['s_128bit_0.U102'].status()
+mydesign.gate_net.gate_dict['s_64bit_1.U38'].status()
 # mydesign.gate_net.gate_dict['OKA_8bit_0_0.U22'].status()
 # mydesign.gate_net.gate_dict['OKA_8bit_2_0.U22'].status()
 

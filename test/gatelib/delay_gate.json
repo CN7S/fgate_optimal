@@ -1,0 +1,21 @@
+{
+    "DEL025D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "I": {
+                "Z": 13
+            }
+        },
+        "i2o_load_delay": {
+            "I": {
+                "Z": 2
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 140,
+        "resistance": 0,
+        "capacitance": 0.5,
+        "glitch_tr": 10,
+        "func_tr": 20
+    }
+}

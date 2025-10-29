@@ -71,11 +71,17 @@ class Design :
     def dumpModule(self, modulename, path) : 
         units.dumpModule(self.modules[modulename], path)
     
-    def dumpAllModule(self, path) : 
+    def dumpAllModule(self, path, only_top_design : bool) : 
         if not os.path.exists(path) :
             os.makedirs(path)
-        for module in self.modules.values() : 
-            units.dumpModule(module=module, filepath=path)
+        units.dumpModule(self.modules[self.top_design], filepath=path)
+        for module in self.modules.values() :
+            if module.name == self.top_design : 
+                continue 
+            if only_top_design : 
+                units.dumpModule(module=module, filepath=path, filename=f'{self.top_design}.v')
+            else : 
+                units.dumpModule(module=module, filepath=path)
 
 
     def setTopDesign(self, top_design):
@@ -1126,7 +1132,14 @@ class Design :
                 else :
                     return None
 
-    def netAnnotation(self, saifpath, inst_path, cycles):
+    def netAnnotation(self, 
+                      saifpath, 
+                      inst_path, 
+                      cycles, 
+                      func_inst_path = None,
+                      func_file_name = 'func.saif',
+                      glitch_inst_path = None, 
+                      glitch_file_name = 'glitch.saif'):
         '''
         Annotate the gate network with the saif file information.
             saifpath : the path of the saif file folder, should contain func.saif and glitch.saif
@@ -1140,13 +1153,22 @@ class Design :
             return
         totalnet = self.gate_net.getSize()
 
-        with open(os.path.join(saifpath, 'func.saif'), 'r') as f:
+        with open(os.path.join(saifpath, func_file_name), 'r') as f:
             func_saifinfo = saifparse.parse(f.read())
-        with open(os.path.join(saifpath, 'glitch.saif'), 'r') as f:
+        with open(os.path.join(saifpath, glitch_file_name), 'r') as f:
             glitch_saifinfo = saifparse.parse(f.read())
-        inst_path = inst_path.split('/')
-        for i in inst_path : 
+
+        if func_inst_path == None : 
+            func_inst_path = inst_path
+        if glitch_inst_path == None : 
+            glitch_inst_path = inst_path
+        
+        func_inst_path = func_inst_path.split('/')
+        for i in func_inst_path : 
             func_saifinfo = func_saifinfo['cells'][i]
+            
+        glitch_inst_path = glitch_inst_path.split('/')
+        for i in glitch_inst_path : 
             glitch_saifinfo = glitch_saifinfo['cells'][i]
 
         def annotateModule(module : Module, funcinfo, glitchinfo):

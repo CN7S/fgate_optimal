@@ -1,5 +1,5 @@
 from .design import Design
-from verilog_parser.netlist import Gate
+from verilog_parser.netlist import Gate, Module, Port, Wire, Instance
 import queue
 import time
 import copy
@@ -61,12 +61,7 @@ class OptEngine() :
             if opt_gain > 0 :
                 replace_gate_list.append( g )
         
-        for g in replace_gate_list : 
-            if gate_id_set[g.name] == 0:
-                continue
-            def clearGate(g):
-                cost = 0
-                gain = 0
+        def clearGate(g):
                 for load_list in g.output_port_load.values() : 
                     for out_gate in load_list : 
                         out_gate = out_gate[0]
@@ -74,22 +69,25 @@ class OptEngine() :
                         gate_id_set[out_gate.name] = _tmp - 1
                         if _tmp == 1 : 
                             clear_gate_list.append(out_gate)
-                            gain, cost = clearGate(out_gate)
                             if out_gate.name in replace_gate_set : 
                                 # gate has been replace
                                 # undo the replace
                                 replace_gate_set.pop(out_gate.name)
-                                cost = cost - self.getPowerCost(out_gate)
                             else : 
-                                # new gain
-                                gain = gain + self.getPowerGain(out_gate)
-                return gain, cost
-
-            gain, cost = clearGate(g)
-            cost = cost + self.getPowerCost(g)
-            gain = gain + self.getPowerGain(g)
+                                clearGate(out_gate)
+        for g in replace_gate_list : 
+            if gate_id_set[g.name] == 0:
+                continue
             replace_gate_set[g.name] = g
+            clearGate(g)
+        for g in replace_gate_set.values() : 
+            gain = self.getPowerGain(g)
+            cost = self.getPowerCost(g)
             stats_cost = stats_cost + cost
+            stats_gain = stats_gain + gain
+        
+        for g in clear_gate_list : 
+            gain = self.getPowerGain(g)
             stats_gain = stats_gain + gain
                 
 
@@ -126,11 +124,19 @@ class OptEngine() :
         module_tree = opt_design.getModuleTree()
         fen_port_list = {k : [] for k in module_tree.keys()}
 
+
+        # time calculate
+        # def min_time_dfs(gate) : 
+
+
+
         for gate in replace_gate_set.values() : 
             gate_name = gate.name
             module_name = gate_name.split('.')[0]
             gate_name = gate_name.split('.')[1]
             unfreezing_time = 0 # calculate time
+            for t in gate.attr.outport_delay_in_network.values() : 
+                unfreezing_time = max(unfreezing_time, t)
             fen_port_list[module_name].append([gate_name, unfreezing_time])
         
         def update_pos_info(module_name) :
@@ -156,6 +162,9 @@ class OptEngine() :
                     port_wire_connect.append([inst.name, inst_enport_width])
                     unfreezing_time_list.extend(inst_time_list)
             
+
+            if enable_port_width == 0 : 
+                return unfreezing_time_list, enable_port_width
             # update Inst Module
             # FGATE 
             # Inst Module
@@ -206,9 +215,93 @@ class OptEngine() :
 
             return unfreezing_time_list, enable_port_width
 
-        update_pos_info(opt_design.top_design)
+        time_list, _ = update_pos_info(opt_design.top_design)
 
-         
+        def genDelayModule(module_name, clk_period, del_time) :
+            new_module = Module(module_name, 
+                        port_dict={}, 
+                        inst_dict={}, 
+                        wire_dict={})
+            # in port
+            clk_port = Port('clked', 0, 1)
+            # out port
+            delen_port = Port('del_en', 1, 1)
+            new_module.port_dict['clked'] = clk_port
+            new_module.port_dict['del_en'] = delen_port
+            
+            opt_design.modules[module_name] = new_module
+            #inst DEL025D1BWP30P140
+            # nclked INVD1BWP30P140
+
+            opt_design.addModuleInst(module_name, 'U0', 'INVD1BWP30P140', {})
+            opt_design.connectPortToPort(module_name, 'self.clked', 0, 'U0.I', 0)
+
+            half_clk = clk_period // 2
+            del_time_per_unit = 15
+            if del_time > half_clk :
+                del_time = del_time - half_clk
+                del_cnt = 2
+                opt_design.addModuleInst(module_name, 'U1', 'DEL025D1BWP30P140', {})
+                opt_design.connectPortToPort(module_name, 'U0.ZN', 0, 'U1.I', 0)
+                del_time = del_time - del_time_per_unit
+                while del_time > 0 : 
+                    opt_design.addModuleInst(module_name, f'U{del_cnt}', 'DEL025D1BWP30P140', {})
+                    opt_design.connectPortToPort(module_name, f'U{del_cnt-1}.Z', 0, f'U{del_cnt}.I', 0)
+                    del_time = del_time - del_time_per_unit
+                    del_cnt = del_cnt + 1
+                opt_design.addModuleInst(module_name, f'U{del_cnt}', 'AN2D1BWP30P140', {})
+                opt_design.connectPortToPort(module_name, f'U{del_cnt-1}.Z', 0, f'U{del_cnt}.A1', 0)
+                opt_design.connectPortToPort(module_name, 'U0.ZN', 0, f'U{del_cnt}.A2', 0)
+                opt_design.connectPortToPort(module_name, f'U{del_cnt}.Z', 0, 'self.del_en', 0)
+
+            else : 
+                del_cnt = 2
+                opt_design.addModuleInst(module_name, 'U1', 'DEL025D1BWP30P140', {})
+                opt_design.connectPortToPort(module_name, 'self.clked', 0, 'U1.I', 0)
+                del_time = del_time - del_time_per_unit
+                while del_time > 0 : 
+                    opt_design.addModuleInst(module_name, f'U{del_cnt}', 'DEL025D1BWP30P140', {})
+                    opt_design.connectPortToPort(module_name, f'U{del_cnt-1}.Z', 0, f'U{del_cnt}.I', 0)
+                    del_time = del_time - del_time_per_unit
+                    del_cnt = del_cnt + 1
+                opt_design.addModuleInst(module_name, f'U{del_cnt}', 'OR2D1BWP30P140', {})
+                opt_design.connectPortToPort(module_name, f'U{del_cnt-1}.Z', 0, f'U{del_cnt}.A1', 0)
+                opt_design.connectPortToPort(module_name, 'U0.ZN', 0, f'U{del_cnt}.A2', 0)
+                opt_design.connectPortToPort(module_name, f'U{del_cnt}.Z', 0, 'self.del_en', 0)
+            
+        with open('time.rpt', 'w') as f: 
+            for t in time_list : 
+                f.write('{}\n'.format(t))
+        
+        # Top
+        new_top_module = Module(opt_design.top_design + '_opt', 
+                        port_dict={}, 
+                        inst_dict={}, 
+                        wire_dict={})
+        for port in opt_design.modules[opt_design.top_design].port_dict.values() :
+            new_top_module.port_dict[port.name] = Port(port.name, port.direction, port.type, port.lsb, port.msb) 
+        new_top_module.port_dict['clked'] = Port('clked', 0, 1)
+        new_top_module.port_dict.pop('en', None)
+        opt_design.modules[new_top_module.name] = new_top_module
+        opt_design.addModuleInst(new_top_module.name, 'U0', opt_design.top_design, {})
+        for port in opt_design.modules[opt_design.top_design].port_dict.values() :
+            if port.name in new_top_module.port_dict : 
+                for i in range(port.lsb, port.msb + 1) : 
+                    opt_design.connectPortToPort(new_top_module.name, 
+                                                 f'self.{port.name}', i,
+                                                 f'U0.{port.name}', i)
+
+        for i in range(len(time_list)) :
+            t = time_list[i]
+            genDelayModule(f'delay_unit_{i}', 1100, t)
+            opt_design.addModuleInst(new_top_module.name, f'U{i+1}', f'delay_unit_{i}', {})
+            opt_design.connectPortToPort(new_top_module.name,
+                                         'self.clked', 0,
+                                         f'U{i+1}.clked', 0)
+            opt_design.connectPortToPort(new_top_module.name, 
+                                         f'U{i+1}.del_en', 0,
+                                         'U0.en', i)
+        opt_design.setTopDesign(new_top_module.name)
         return opt_design
 
         

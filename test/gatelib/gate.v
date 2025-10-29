@@ -72,3 +72,8 @@ module XNR2UD1BWP30P140 (
     input A1,A2;
     output ZN;
 endmodule
+
+module OR2D1BWP30P140 (A1, A2, Z);
+    input A1, A2;
+    output Z;
+endmodule

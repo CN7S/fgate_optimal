@@ -2,11 +2,14 @@ from verilog_parser.netlist import Module
 import os
 
 
-def dumpModule(module : Module, filepath : str) :
+def dumpModule(module : Module, filepath : str, filename = None) :
 
     
     module_name = module.name
-    filepath = os.path.join(filepath, f'{module_name}.v')
+    if filename is None : 
+        filepath = os.path.join(filepath, f'{module_name}.v')
+    else : 
+        filepath = os.path.join(filepath, filename)
 
     # module.dumpjson(filepath + '.json')
 
@@ -190,10 +193,20 @@ def dumpModule(module : Module, filepath : str) :
         inst_str = f'{inst.module} {inst.name} ( {inst_port_str} );\n'
         module_inst_define = module_inst_define + inst_str
 
-    with open(filepath, 'w') as f :
-        f.write(module_header)
-        f.write(module_port_define)
-        f.write(module_wire_define)
-        f.write(module_assign_define)
-        f.write(module_inst_define)
-        f.write(module_end)
+    if filename is None :
+        with open(filepath, 'w') as f :
+            f.write(module_header)
+            f.write(module_port_define)
+            f.write(module_wire_define)
+            f.write(module_assign_define)
+            f.write(module_inst_define)
+            f.write(module_end)
+    else : 
+        with open(filepath, 'a') as f :
+            f.write(module_header)
+            f.write(module_port_define)
+            f.write(module_wire_define)
+            f.write(module_assign_define)
+            f.write(module_inst_define)
+            f.write(module_end)
+

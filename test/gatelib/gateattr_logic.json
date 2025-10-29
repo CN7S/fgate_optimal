@@ -1,0 +1,270 @@
+{
+    "XOR2UD1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "Z": 20
+            },
+            "A2": {
+                "Z": 25
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "Z": 2
+            },
+            "A2": {
+                "Z": 2
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 140,
+        "resistance": 0,
+        "capacitance": 0.5,
+        "glitch_tr": 10,
+        "func_tr": 20
+    },
+    "XOR3UD1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "Z": 50
+            },
+            "A2": {
+                "Z": 50
+            },
+            "A3": {
+                "Z": 40
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "Z": 0
+            },
+            "A2": {
+                "Z": 0
+            },
+            "A3": {
+                "Z": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 200,
+        "resistance": 0,
+        "capacitance": 0.7,
+        "glitch_tr": 15,
+        "func_tr": 25
+    },
+    "XOR4D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "Z": 40
+            },
+            "A2": {
+                "Z": 45
+            },
+            "A3": {
+                "Z": 48
+            },
+            "A4": {
+                "Z": 40
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "Z": 0
+            },
+            "A2": {
+                "Z": 0
+            },
+            "A3": {
+                "Z": 0
+            },
+            "A4": {
+                "Z": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 300,
+        "resistance": 0,
+        "capacitance": 1.0,
+        "glitch_tr": 20,
+        "func_tr": 30
+    },
+    "CKND2D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "ZN": 15
+            },
+            "A2": {
+                "ZN": 15
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "ZN": 0
+            },
+            "A2": {
+                "ZN": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 100,
+        "resistance": 0,
+        "capacitance": 0.3,
+        "glitch_tr": 5,
+        "func_tr": 15
+    },
+    "NR2D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "ZN": 20
+            },
+            "A2": {
+                "ZN": 10
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "ZN": 0
+            },
+            "A2": {
+                "ZN": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 120,
+        "resistance": 0,
+        "capacitance": 0.4,
+        "glitch_tr": 8,
+        "func_tr": 18
+    },
+    "AN2D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "Z": 20
+            },
+            "A2": {
+                "Z": 20
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "Z": 0
+            },
+            "A2": {
+                "Z": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 110,
+        "resistance": 0,
+        "capacitance": 0.35,
+        "glitch_tr": 6,
+        "func_tr": 16
+    },
+    "INR2D1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "ZN": 20
+            },
+            "B1": {
+                "ZN": 10
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "ZN": 0
+            },
+            "B1": {
+                "ZN": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 130,
+        "resistance": 0,
+        "capacitance": 0.45,
+        "glitch_tr": 9,
+        "func_tr": 19
+    },
+    "INVD1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "I": {
+                "ZN": 8
+            }
+        },
+        "i2o_load_delay": {
+            "I": {
+                "ZN": 2
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 80,
+        "resistance": 0,
+        "capacitance": 0.25,
+        "glitch_tr": 4,
+        "func_tr": 14
+    },
+    "XNR3UD1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "ZN": 38
+            },
+            "A2": {
+                "ZN": 38
+            },
+            "A3": {
+                "ZN": 22
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "ZN": 0
+            },
+            "A2": {
+                "ZN": 0
+            },
+            "A3": {
+                "ZN": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 250,
+        "resistance": 0,
+        "capacitance": 0.8,
+        "glitch_tr": 18,
+        "func_tr": 28
+    },
+    "XNR2UD1BWP30P140": {
+        "i2o_intrinsic_delay": {
+            "A1": {
+                "ZN": 25
+            },
+            "A2": {
+                "ZN": 25
+            }
+        },
+        "i2o_load_delay": {
+            "A1": {
+                "ZN": 0
+            },
+            "A2": {
+                "ZN": 0
+            }
+        },
+        "intrinsic_power": 0,
+        "power_per_load": 0,
+        "area": 150,
+        "resistance": 0,
+        "capacitance": 0.55,
+        "glitch_tr": 12,
+        "func_tr": 22
+    }
+}
