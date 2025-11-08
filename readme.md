@@ -4,7 +4,7 @@
     
     - how to use
     ```
-    import saif_parser as saifp
+    from saif_parser import saifparse as saifp
     output = saifp.parse(data_str)
     ```
     - output struct
